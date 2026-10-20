@@ -2,27 +2,47 @@
   "name": "template-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/db-migrate.ts",
     "start": "next start",
-    "lint": "eslint"
+    "setup": "node scripts/setup.ts",
+    "verify": "next typegen && vp check && vp test && node scripts/db-check.ts && next build && node scripts/smoke.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/db-migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down --volumes && docker compose up -d --wait && node scripts/db-migrate.ts",
+    "prepare": "vp config && next typegen"
   },
   "dependencies": {
+    "@astryxdesign/core": "^0.7.1",
+    "@astryxdesign/theme-neutral": "^0.7.1",
+    "@stylexjs/stylex": "^0.19.1",
+    "drizzle-orm": "^0.45.4",
     "next": "16.4.2",
+    "postgres": "^3.4.9",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@astryxdesign/cli": "^0.7.1",
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "drizzle-kit": "^0.31.11",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^7.0.2",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
   },
   "packageManager": "pnpm@12.14.0"
 }

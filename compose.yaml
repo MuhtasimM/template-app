@@ -1,0 +1,24 @@
+# A local Postgres 17 for development, so you don't need Supabase on your computer.
+# Start it with `vp run db:up`, then set this in .env.local:
+#   DATABASE_URL=postgresql://postgres:postgres@localhost:55433/postgres
+# and run `vp run setup` to create the tables. Data survives restarts (the `pg` volume).
+# Port 55433 avoids clashing with another Postgres on 5432.
+name: template-app
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "55433:5432"
+    volumes:
+      - pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pg:

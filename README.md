@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Template App
 
-## Getting Started
+A private posts-and-comments board behind a shared password, with a Postgres database.
 
-First, run the development server:
+Built with Next.js 16, Vite+, Astryx, Tailwind, Drizzle and TypeScript 7. Deploys to Vercel.
+
+## Get started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+vp install
+vp run setup   # creates .env.local (the password is "test")
+vp run dev     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+In `.env.local`, set:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `APP_PASSWORD`: the password everyone uses to log in. It starts as `test`; use a stronger one on Vercel.
+- `DATABASE_URL`: either a local Postgres in Docker or Supabase (see below)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run `vp run setup` again after adding the database URL to create the tables.
 
-## Learn More
+## Database
 
-To learn more about Next.js, take a look at the following resources:
+**Local, with Docker:** start Postgres with `vp run db:up` (stop it with `vp run db:down`), then use:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+DATABASE_URL=postgresql://postgres:postgres@localhost:55433/postgres
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Supabase:** copy the URL from Connect → Transaction pooler (port 6543). Use this one on Vercel.
 
-## Deploy on Vercel
+### Changing the database
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Edit `src/db/schema.ts`.
+2. Run `vp run db:generate` to write a migration in `drizzle/`.
+3. Run `vp run db:migrate` to apply it.
+4. Commit the schema and the migration together.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Production deployments on Vercel apply new migrations automatically. If your local database was made before migrations existed, run `vp run db:reset` (this deletes its data).
+
+## Check everything works
+
+```bash
+vp run verify
+```
+
+This runs formatting, lint and type checks, unit tests, a production build and a smoke test that checks the password gate and that no secrets end up in browser code.
+
+## Deploy
+
+Import the repo in Vercel and add `APP_PASSWORD`, `SESSION_SECRET` and `DATABASE_URL` as environment variables.
+
+See [AGENTS.md](./AGENTS.md) for how the project is organised and how to work on it, and [docs/](./docs) for what each feature does.
